@@ -1,6 +1,7 @@
 package Cliente;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
@@ -11,6 +12,7 @@ import java.security.PrivateKey;
 import java.security.*;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
@@ -18,6 +20,7 @@ import java.util.Date;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.xml.bind.DatatypeConverter;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -34,7 +37,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 public class Protocolo {
 	private static String[] CADENAS_DE_CONTROL = {"HOLA","ALGORITMOS","OK","ERROR"};
-	private static String SEPARADOR = ":";
+	private static String PADDING = "AES/ECB/PKCS5Padding";
 
 	public static void procesar (String algoritmos,BufferedReader stdIn, BufferedReader pIn, PrintWriter pOut) throws IOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException
 	{
@@ -45,34 +48,57 @@ public class Protocolo {
 		{
 			System.out.println("Respuesta del servidor: "+ fromServer);
 			pOut.println(algoritmos);
-
-			if((fromServer = pIn.readLine())!= null && fromServer.equalsIgnoreCase(CADENAS_DE_CONTROL[2]))
+			fromServer = pIn.readLine();
+			if((fromServer != null && fromServer.equalsIgnoreCase(CADENAS_DE_CONTROL[2])))
 			{
-				//llaves asimetricas
+				//llaves asimetricas con RSA
 				String[] algoritmos2 = algoritmos.split(":");
-				KeyPairGenerator generator = KeyPairGenerator.getInstance(algoritmos2[1]);
+				KeyPairGenerator generator = KeyPairGenerator.getInstance(algoritmos2[2]);
 				generator.initialize(1024);//inicializa el generador que va a crear llaves del tamaño que se envio como parametro
 				KeyPair pareja = generator.generateKeyPair();
 				PublicKey llavePublica = pareja.getPublic();
 				PrivateKey llavePrivada = pareja.getPrivate();
 
 				//Llave simetrica
-				KeyGenerator keyGen = KeyGenerator.getInstance(ConSeguridad.ALGORITMO_ASIMETRICO);
-				SecretKey secretKey = keyGen.generateKey();
+				KeyGenerator keyGen = KeyGenerator.getInstance(algoritmos2[1]);
+				SecretKey llaveSimetrica = keyGen.generateKey();
+				//enviar certificado cliente
 
-				//TODO enviar certificado cliente
-				X509Certificate certificadoCliente = generarCertificadoCliente(llavePublica,llavePrivada);
-				pOut.println(certificadoCliente);
+				X509Certificate certificadoCliente = generarCertificadoCliente(llavePublica,llavePrivada,algoritmos2[3]);
+				byte[] certificadoEnBytes = certificadoCliente.getEncoded();
+				String certificadoEnString = DatatypeConverter.printHexBinary(certificadoEnBytes);
+				pOut.println(certificadoEnString);
 
-				X509Certificate certificadoServidor = recibirCertificadoServidor();
+				X509Certificate certificadoServidor = recibirCertificadoServidor(pIn);
 
-				byte[] textoCifradoEnviar = cifrar(certificadoServidor.getPublicKey(),secretKey);
-				if(textoCifradoEnviar!= null) pOut.println(textoCifradoEnviar);
-
+				byte[] textoCifradoEnviar = cifrarAsimetrico(certificadoServidor.getPublicKey(),llaveSimetrica);
+				if(textoCifradoEnviar!= null) 
+				{
+					pOut.println(textoCifradoEnviar);
+				}
 				if((fromServer = pIn.readLine())!= null)
 				{
-					descifrar(fromServer, llavePrivada);
-					hmac();
+					System.out.println("hola4");
+					byte[] textoDescifrado = descifrarAsimetricoConLlavePrivada(fromServer, llavePrivada);
+					String textoDC = new String(textoDescifrado);
+					String textoC = new String(textoCifradoEnviar);
+					if(textoC.equalsIgnoreCase(textoDC))
+					{
+						pOut.println(CADENAS_DE_CONTROL[2]);
+					}
+					cifrarSimetrico(llaveSimetrica);
+					byte[] digest = hmac(algoritmos2[2], llaveSimetrica);
+					if((fromServer = pIn.readLine())!= null && !fromServer.equals(CADENAS_DE_CONTROL[3]))
+					{
+						//TODO verificar lo que me envia
+						byte[] rta = descifrarAsimetricoConLlavePublica(fromServer, certificadoServidor.getPublicKey());
+						String aux1 = new String(rta);
+						String aux2 = new String(digest);
+						if(aux1.equals(aux2))
+						{
+							System.out.println("termino exitosamente");
+						}
+					}
 				}
 			}
 			else if((fromServer = pIn.readLine())!= null && fromServer.equalsIgnoreCase(CADENAS_DE_CONTROL[3]))
@@ -94,7 +120,7 @@ public class Protocolo {
 	 * @throws OperatorCreationException 
 	 * @throws CertificateException 
 	 */
-	public static X509Certificate generarCertificadoCliente(PublicKey publica, PrivateKey privada) throws CertIOException, OperatorCreationException, CertificateException
+	public static X509Certificate generarCertificadoCliente(PublicKey publica, PrivateKey privada, String algoritmo) throws CertIOException, OperatorCreationException, CertificateException
 	{
 		//TODO
 		Provider bcProvider = new BouncyCastleProvider();
@@ -112,7 +138,8 @@ public class Protocolo {
 
 		Date endDate = calendar.getTime();
 
-		String signatureAlgorithm = "SHA512WithRSA"; // <-- Use appropriate signature algorithm based on your keyPair algorithm.
+		String numSha = algoritmo.substring(7, algoritmo.length());
+		String signatureAlgorithm = "SHA"+numSha+"WithRSA"; // <-- Use appropriate signature algorithm based on your keyPair algorithm.
 
 		ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).build(privada);
 
@@ -126,23 +153,26 @@ public class Protocolo {
 		certBuilder.addExtension(new ASN1ObjectIdentifier("2.5.29.19"), true, basicConstraints); // Basic Constraints is usually marked as critical.
 
 		// -------------------------------------
-
 		return new JcaX509CertificateConverter().setProvider(bcProvider).getCertificate(certBuilder.build(contentSigner));
 	}
-	public static X509Certificate recibirCertificadoServidor()
+	public static X509Certificate recibirCertificadoServidor(BufferedReader pIn) throws IOException, CertificateException
 	{
-		//TODO
-		return null;
+		//TODO revisar si funciona
+		byte[] certificadoEnBytes = DatatypeConverter.parseHexBinary(pIn.readLine());
+		CertificateFactory factory = CertificateFactory.getInstance("X.509");
+		X509Certificate certificado = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(certificadoEnBytes));
+		return certificado;
 	}
-	public static byte[] cifrar(PublicKey llavePublicaServidor, SecretKey llaveSimetrica)
+	public static byte[] cifrarAsimetrico(PublicKey llavePublicaServidor, SecretKey llaveSimetrica)
 	{
 		try
 		{
 			Cipher cifrador = Cipher.getInstance(ConSeguridad.ALGORITMO_ASIMETRICO);
 			byte[] textoCifrado;
-
 			cifrador.init(Cipher.ENCRYPT_MODE, llavePublicaServidor);
+
 			textoCifrado = cifrador.doFinal(llaveSimetrica.getEncoded());
+
 			return textoCifrado;
 		}
 		catch(Exception e)
@@ -151,14 +181,53 @@ public class Protocolo {
 			return null;
 		}
 	}
-	public static byte[] descifrar(String fromServer, PrivateKey llavePrivadaCliente)
+	public static byte[] cifrarSimetrico(SecretKey llaveSimetrica)
+	{
+		byte[] textoCifrado;
+		try{
+			Cipher cifrador = Cipher.getInstance(PADDING);
+			byte[] textoClaro = "15;41 24.2028,2 10.4418".getBytes();
+
+			cifrador.init(Cipher.ENCRYPT_MODE, llaveSimetrica);
+			textoCifrado = cifrador.doFinal(textoClaro);
+
+			return textoCifrado;
+		}
+		catch(Exception e)
+		{
+			System.out.println("Excpcion: " + e.getMessage());
+			return null;
+		}
+	}
+	public static byte[] descifrarAsimetricoConLlavePrivada(String fromServer, PrivateKey llavePrivadaCliente)
+	{
+		byte[] textoClaro;
+
+		try
+		{
+			System.out.println("aqui");
+			Cipher cifrador = Cipher.getInstance(ConSeguridad.ALGORITMO_ASIMETRICO);
+			System.out.println("aqui2");
+			cifrador.init(Cipher.DECRYPT_MODE, llavePrivadaCliente);
+			System.out.println("aqui3");
+			textoClaro = cifrador.doFinal(fromServer.getBytes());
+			System.out.println("aqui4");
+			return textoClaro;
+		}
+		catch(Exception e)
+		{
+			System.out.println("Excepcion: "+e.getMessage());
+			return null;
+		}
+	}
+	public static byte[] descifrarAsimetricoConLlavePublica(String fromServer, PublicKey llavePublicaCliente)
 	{
 		byte[] textoClaro;
 
 		try
 		{
 			Cipher cifrador = Cipher.getInstance(ConSeguridad.ALGORITMO_ASIMETRICO);
-			cifrador.init(Cipher.DECRYPT_MODE, llavePrivadaCliente);
+			cifrador.init(Cipher.DECRYPT_MODE, llavePublicaCliente);
 
 			textoClaro = cifrador.doFinal(fromServer.getBytes());
 			return textoClaro;
@@ -169,9 +238,16 @@ public class Protocolo {
 			return null;
 		}
 	}
-	public static void hmac()
+	public static byte[] hmac(String algoritmo, SecretKey llaveSimetrica)
 	{
-		//TODO
+		//TODO que se hace con esto?
+		//SHA-X
+		//"15;41 24.2028,2 10.4418".getBytes();
+		String numSha = algoritmo.substring(7, algoritmo.length());
+
+		byte[] shaX = Digest.getDigest("SHA-"+numSha, llaveSimetrica.getEncoded());
+
+		return shaX;
 	}
 }
 
