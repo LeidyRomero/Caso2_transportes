@@ -66,7 +66,6 @@ public class Protocolo {
 
 				X509Certificate certificadoCliente = generarCertificadoCliente(llavePublica,llavePrivada,algoritmos2[3]);
 				byte[] certificadoEnBytes = certificadoCliente.getEncoded();
-
 				String certificadoEnString = DatatypeConverter.printHexBinary(certificadoEnBytes);
 				pOut.println(certificadoEnString);
 
