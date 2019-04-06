@@ -17,7 +17,7 @@ public class ConSeguridad {
 	public final static String ALGORITMO_ASIMETRICO = "RSA";
 	public final static String[] ALGORITMOS_HMAC = {"HMACSHA1","HMACSHA256","HMACSHA384","HMACSHA512"};
 	
-	public ConSeguridad() throws IOException, OperatorCreationException, CertificateException
+	public static void main(String args[]) throws IOException, OperatorCreationException, CertificateException
 	{
 		Socket socket = null;
 		PrintWriter escritor = null;
@@ -38,7 +38,7 @@ public class ConSeguridad {
 
 		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 		
-		String algoritmos = "ALGORITMOS";
+		String algoritmos = "ALGORITMOS:";
 		int RandomSimetricos = (int) Math.random()*ALGORITMOS_SIMETRICOS.length;
 		int RandomHmac = (int) Math.random()*ALGORITMOS_HMAC.length;
 		algoritmos+= ALGORITMOS_SIMETRICOS[RandomSimetricos]+":"+ALGORITMO_ASIMETRICO+":"+ALGORITMOS_HMAC[RandomHmac];
