@@ -75,16 +75,16 @@ public class SinSeguridad {
 		pOut.println(HOLA);
 
 		String fromServer = "";
-
+		
+		System.out.println("Cliente: empezando comunicación");
+		
 		if((fromServer = pIn.readLine()) != null && fromServer.equals(OK)) {
-			System.out.println("Respuesta servidor: " + fromServer);
 			pOut.println(ALGORITMOS+SEPARADOR+AES+SEPARADOR+RSA+SEPARADOR+HMACSHA512);
-			System.out.println("Repsuesta cliente: " + ALGORITMOS+SEPARADOR+AES+SEPARADOR+RSA+SEPARADOR+HMACSHA512);
+			System.out.println("Cliente: " + ALGORITMOS+SEPARADOR+AES+SEPARADOR+RSA+SEPARADOR+HMACSHA512);
 		}
 
 		if((fromServer = pIn.readLine()) != null && fromServer.equals(OK)) {
-
-			System.out.println("Respuesta servidor: " + fromServer);
+			
 			//Llaves
 			KeyPairGenerator generator = KeyPairGenerator.getInstance(RSA);
 			generator.initialize(1024);
@@ -97,38 +97,38 @@ public class SinSeguridad {
 			byte[] certificadoEnBytes = certificado.getEncoded( );
 			String certificadoEnString = DatatypeConverter.printHexBinary(certificadoEnBytes);
 			pOut.println(certificadoEnString);
+			
+			System.out.println("Cliente: envía certificado");
 		}
 
 		if((fromServer = pIn.readLine()) != null) {
-			System.out.println("Respuesta servidor: " + fromServer);
+			System.out.println("Cliente: recibe cetificado del servidor");
 			byte[] b = new byte[128];
 			new Random().nextBytes(b);
 			String cadenaBytes = DatatypeConverter.printHexBinary(b);
 			pOut.println(cadenaBytes);
-			System.out.println("Repsuesta cliente: " + cadenaBytes);
+			System.out.println("Cliente: envía 128 Bytes");
 		}
-
-		if((fromServer = pIn.readLine()) != null) {
-			System.out.println("Respuesta servidor: " + fromServer);
-
-			
+		String datos = "";	
+		if((fromServer = pIn.readLine()) != null) {			
 			pOut.println(OK);
-			pOut.println("<Datos>");
-			pOut.println("<Datos>");
-			System.out.println("Repsuesta cliente: " + OK);
-			System.out.println("Repsuesta cliente: " + "<Datos>");
-			System.out.println("Repsuesta cliente: " + "<Datos>");
+			datos = "15;41 24.2028,2 10.4418";						
+			pOut.println(datos);
+			pOut.println(datos);
+			System.out.println("Cliente: " + OK);
+			System.out.println("Cliente: " + datos);
+			System.out.println("Cliente: " + datos);
 		}
 
 		if((fromServer = pIn.readLine()) != null) {
-			System.out.println("Respuesta servidor: " + fromServer);
-			if(!fromServer.equals("ERROR"))
+			if(!fromServer.equals("ERROR") && fromServer.equals(datos))
 			{
-				//TODO Verificar que los datos que llegan
+				System.out.println("Cliente: verificación exitosa de los datos");
+				System.out.println("Cliente: termina exitosamente");
 			}
 		}
 
-
+		
 	}
 
 	public static X509Certificate generarCertificado(PublicKey publica, PrivateKey privada) throws OperatorCreationException, CertIOException, CertificateException {
