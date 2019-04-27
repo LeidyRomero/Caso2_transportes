@@ -16,8 +16,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
 
-public class D
-  extends Thread
+public class D extends Thread
 {
   public static final String OK = "OK";
   public static final String ALGORITMOS = "ALGORITMOS";

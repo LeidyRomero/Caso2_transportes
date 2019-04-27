@@ -14,8 +14,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
-public class D extends Thread {
-
+//TODO documento
+public class D implements Runnable
+//extends Thread
+{
 	public static final String OK = "OK";
 	public static final String ALGORITMOS = "ALGORITMOS";
 	public static final String CERTSRV = "CERTSRV";
@@ -122,6 +124,7 @@ public class D extends Thread {
 
 				/***** Fase 5: *****/
 				linea = dc.readLine();
+				//TODO MONITOR DE TIEMPOS
 				byte[] llaveSimetrica = S.ad(
 						toByteArray(linea), 
 						keyPairServidor.getPrivate(), algoritmos[2] );
