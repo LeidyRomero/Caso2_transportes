@@ -33,16 +33,15 @@ public class C {
 		// Adiciona la libreria como un proveedor de seguridad.
 		// Necesario para crear llaves.
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());		
-
-		int idThread = 0;
-		//TODO documento
-		int numeroThreads = Integer.parseInt(br.readLine());
-		ss = new ServerSocket(ip);
-		//TODO documento
-		pool = Executors.newFixedThreadPool(numeroThreads);
 		// Crea el socket que escucha en el puerto seleccionado.
 		ss = new ServerSocket(ip);
 		System.out.println(MAESTRO + "Socket creado.");
+		
+		int idThread = 0;
+		//TODO documento
+		int numeroThreads = Integer.parseInt(br.readLine());
+		//TODO documento
+		pool = Executors.newFixedThreadPool(numeroThreads);
 
 		keyPairServidor = S.grsa();
 		certSer = S.gc(keyPairServidor);

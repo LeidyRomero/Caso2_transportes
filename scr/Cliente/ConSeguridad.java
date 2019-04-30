@@ -11,7 +11,7 @@ import java.security.cert.CertificateException;
 import org.bouncycastle.operator.OperatorCreationException;
 
 public class ConSeguridad {
-	private static int PUERTO = 8000;
+	private static int PUERTO = 3400;
 	public static final String SERVIDOR = "localhost";
 	public final static String[] ALGORITMOS_SIMETRICOS = {"AES","Blowfish"};
 	public final static String ALGORITMO_ASIMETRICO = "RSA";
