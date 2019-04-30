@@ -46,7 +46,7 @@ public class C {
 		keyPairServidor = S.grsa();
 		certSer = S.gc(keyPairServidor);
 		D.initCertificate(certSer, keyPairServidor);
-		while (true) {
+		while (idThread<numeroThreads) {
 			try { 
 				Socket sc = ss.accept();
 				System.out.println(MAESTRO + "Cliente " + idThread + " aceptado.");
