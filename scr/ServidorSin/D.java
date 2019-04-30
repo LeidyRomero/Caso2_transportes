@@ -1,4 +1,4 @@
-package srv;
+package ServidorSin;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -14,10 +14,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
-//TODO documento
-public class D implements Runnable
-//extends Thread
-{
+public class D extends Thread {
 	public static final String OK = "OK";
 	public static final String ALGORITMOS = "ALGORITMOS";
 	public static final String CERTSRV = "CERTSRV";
@@ -27,6 +24,17 @@ public class D implements Runnable
 	public static final String INICIO = "INICIO";
 	public static final String ERROR = "ERROR";
 	public static final String REC = "recibio-";
+	public static final String DES = "DES";
+	public static final String AES = "AES";
+	public static final String BLOWFISH = "Blowfish";
+	public static final String RSA = "RSA";
+	public static final String ECIES = "ECIES";
+	public static final String RC4 = "RC4";
+	public static final String HMACMD5 = "HMACMD5";
+	public static final String HMACSHA1 = "HMACSHA1";
+	public static final String HMACSHA256 = "HMACSHA256";
+	public static final String HMACSHA384 = "HMACSHA384";
+	public static final String HMACSHA512 = "HMACSHA512";
 
 	// Atributos
 	private Socket sc = null;
@@ -37,7 +45,7 @@ public class D implements Runnable
 	
 	public D (Socket csP, int idP) {
 		sc = csP;
-		dlg = new String("delegado " + idP + ": ");
+		dlg = new String("delegado sin" + idP + ": ");
 		try {
 		mybyte = new byte[520]; 
 		mybyte = certSer.getEncoded( );
@@ -53,11 +61,11 @@ public class D implements Runnable
 	}
 	
 	private boolean validoAlgHMAC(String nombre) {
-		return ((nombre.equals(S.HMACMD5) || 
-			 nombre.equals(S.HMACSHA1) ||
-			 nombre.equals(S.HMACSHA256) ||
-			 nombre.equals(S.HMACSHA384) ||
-			 nombre.equals(S.HMACSHA512)
+		return ((nombre.equals(HMACMD5) || 
+			 nombre.equals(HMACSHA1) ||
+			 nombre.equals(HMACSHA256) ||
+			 nombre.equals(HMACSHA384) ||
+			 nombre.equals(HMACSHA512)
 			 ));
 	}
 
@@ -89,13 +97,13 @@ public class D implements Runnable
 				}
 				
 				String[] algoritmos = linea.split(SEPARADOR);
-				if (!algoritmos[1].equals(S.DES) && !algoritmos[1].equals(S.AES) &&
-					!algoritmos[1].equals(S.BLOWFISH) && !algoritmos[1].equals(S.RC4)){
+				if (!algoritmos[1].equals(DES) && !algoritmos[1].equals(AES) &&
+					!algoritmos[1].equals(BLOWFISH) && !algoritmos[1].equals(RC4)){
 					ac.println(ERROR);
 					sc.close();
 					throw new Exception(dlg + ERROR + "Alg.Simetrico" + REC + algoritmos + "-terminando.");
 				}
-				if (!algoritmos[2].equals(S.RSA) ) {
+				if (!algoritmos[2].equals(RSA) ) {
 					ac.println(ERROR);
 					sc.close();
 					throw new Exception(dlg + ERROR + "Alg.Asimetrico." + REC + algoritmos + "-terminando.");
@@ -124,19 +132,13 @@ public class D implements Runnable
 
 				/***** Fase 5: *****/
 				linea = dc.readLine();
-				//TODO MONITOR DE TIEMPOS
-				byte[] llaveSimetrica = S.ad(
-						toByteArray(linea), 
-						keyPairServidor.getPrivate(), algoritmos[2] );
-				SecretKey simetrica = new SecretKeySpec(llaveSimetrica, 0, llaveSimetrica.length, algoritmos[1]);
+				byte[] llaveSimetrica = toByteArray(linea);
 				System.out.println(dlg + "creo llave simetrica de dato recibido. continuando.");				
 				
 				
-				/***** Fase 6:  *****/
-				
-				byte [ ] ciphertext1 = S.ae(simetrica.getEncoded(), 
-		                 certificadoCliente.getPublicKey(), algoritmos[2]);
-				ac.println(toHexString(ciphertext1));
+				//**** Fase 6:  *****
+
+				ac.println(toHexString(llaveSimetrica));
 				System.out.println(dlg + "envio llave simetrica al cliente. continuado.");
 
 				linea = dc.readLine();
@@ -144,32 +146,30 @@ public class D implements Runnable
 					sc.close();
 					throw new Exception(dlg + ERROR + "en confirmacion de llave simetrica." + REC + "-terminando.");
 				}
-				
-				/***** Fase 7:  *****/
 
-				linea = dc.readLine();				
-				String datos = new String(S.sd(
-						toByteArray(linea), simetrica, algoritmos[1]));
-				linea = dc.readLine();
+				//**** Fase 7:  *****
+
+				String datos1 = dc.readLine();				
+				String datos2 = dc.readLine();
 				
-				byte[] hmac = toByteArray(linea);
-				
-				/***** Fase 8:  *****/
-				boolean verificacion = S.vi(
-						                 datos.getBytes(), simetrica, algoritmos[3], hmac);
+
+				//**** Fase 8:  *****
+				boolean verificacion = datos1.equals(datos2);
 				if (verificacion) {
 					System.out.println(dlg + "verificacion de integridad:OK. -continuado.");
-					byte[] recibo = S.ae(hmac, keyPairServidor.getPrivate(), algoritmos[2]);
-					ac.println(toHexString(recibo));
+					ac.println(datos1);
 				} else {
 					ac.println(ERROR);
 					throw new Exception(dlg + "Error en verificacion de integridad. -terminando.");
 				}
-				
+
 		        sc.close();
 		        System.out.println(dlg + "Termino exitosamente.");
 				
 	        } catch (Exception e) {
+	        	try {
+	        	    sc.close();
+	        	} catch (Exception e2) { e2.printStackTrace(); }
 	          e.printStackTrace();
 	        }
 	}
@@ -181,5 +181,4 @@ public class D implements Runnable
 	public static byte[] toByteArray(String s) {
 	    return DatatypeConverter.parseHexBinary(s);
 	}
-	
 }
