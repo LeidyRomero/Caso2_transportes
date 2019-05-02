@@ -6,18 +6,20 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-
-import org.bouncycastle.operator.OperatorCreationException;
 
 public class ConSeguridad {
-	private static int PUERTO = 3400;
+	private static int PUERTO = 8000;
 	public static final String SERVIDOR = "localhost";
-	public final static String[] ALGORITMOS_SIMETRICOS = {"AES","Blowfish"};
-	public final static String ALGORITMO_ASIMETRICO = "RSA";
-	public final static String[] ALGORITMOS_HMAC = {"HMACSHA1","HMACSHA256","HMACSHA384","HMACSHA512"};
 	
-	public static void main(String args[]) throws IOException, OperatorCreationException, CertificateException
+	public static final String HOLA = "HOLA";
+	public static final String ALGORITMOS = "ALGORITMOS";
+	public static final String OK = "OK";
+	public static final String SEPARADOR = ":";
+	public static final String AES = "AES";
+	public static final String RSA = "RSA";
+	public static final String HMACSHA1 = "HMACSHA1";
+		
+	public static void main(String args[]) throws Exception
 	{
 		Socket socket = null;
 		PrintWriter escritor = null;
@@ -39,9 +41,7 @@ public class ConSeguridad {
 		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 		
 		String algoritmos = "ALGORITMOS:";
-		int RandomSimetricos = (int) Math.random()*ALGORITMOS_SIMETRICOS.length;
-		int RandomHmac = (int) Math.random()*ALGORITMOS_HMAC.length;
-		algoritmos+= ALGORITMOS_SIMETRICOS[RandomSimetricos]+":"+ALGORITMO_ASIMETRICO+":"+ALGORITMOS_HMAC[RandomHmac];
+		algoritmos+= AES+":"+RSA+":"+HMACSHA1;
 		
 		try {
 			Protocolo.procesar(algoritmos,stdIn,lector,escritor);
@@ -54,4 +54,5 @@ public class ConSeguridad {
 		socket.close();
 		stdIn.close();
 	}
+
 }
