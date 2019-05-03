@@ -39,6 +39,8 @@ public class C {
 		
 		int idThread = 0;
 		//TODO documento
+		System.out.println(MAESTRO + "Establezca número de threads:");
+		//TODO documento
 		int numeroThreads = Integer.parseInt(br.readLine());
 
 		//TODO documento

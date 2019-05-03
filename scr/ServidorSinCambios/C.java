@@ -39,10 +39,13 @@ public class C {
 		
 		int idThread = 0;
 		//TODO documento
+		System.out.println(MAESTRO + "Establezca número de threads:");
+		//TODO documento
 		int numeroThreads = Integer.parseInt(br.readLine());
 		//TODO documento
 		pool = Executors.newFixedThreadPool(numeroThreads);
-
+		System.out.println(MAESTRO + "Pool creado.");
+		
 		keyPairServidor = S.grsa();
 		certSer = S.gc(keyPairServidor);
 		D.initCertificate(certSer, keyPairServidor);
