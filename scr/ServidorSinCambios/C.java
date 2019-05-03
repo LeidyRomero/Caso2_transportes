@@ -44,6 +44,7 @@ public class C {
 		int numeroThreads = Integer.parseInt(br.readLine());
 		//TODO documento
 		pool = Executors.newFixedThreadPool(numeroThreads);
+		//TODO documento
 		System.out.println(MAESTRO + "Pool creado.");
 		
 		keyPairServidor = S.grsa();
