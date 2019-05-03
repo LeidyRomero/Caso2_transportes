@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.security.KeyPair;
@@ -19,6 +20,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.xml.bind.DatatypeConverter;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -164,5 +172,21 @@ public class SinSeguridad {
 	    // -------------------------------------
 
 	    return new JcaX509CertificateConverter().setProvider(bcProvider).getCertificate(certBuilder.build(contentSigner));
+	}
+	
+	public double getSystemCpuLoad() throws MalformedObjectNameException, NullPointerException, InstanceNotFoundException, ReflectionException
+	{
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		ObjectName name = ObjectName.getInstance("java.lang:type=OperatingSystem");
+		AttributeList list = mbs.getAttributes(name,new String[] {"SystemCpuLoad"});
+		
+		if(list.isEmpty()) return Double.NaN;
+		
+		Attribute att = (Attribute) list.get(0);
+		Double value = (Double) att.getValue();
+		
+		if(value == -1.0 ) return Double.NaN;
+		
+		return ((int) (value*1000)/10.0);
 	}
 }

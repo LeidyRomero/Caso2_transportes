@@ -1,4 +1,4 @@
-package ServidorSinCambios;
+package ServidorSinSeguridadCambios;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class C {
 		D.initCertificate(certSer, keyPairServidor);
 		while (idThread<numeroThreads) {
 			try { 
-				Socket sc = ss.accept();
+				Socket sc = ss.accept();//TODO contar transacciones aceptadas idThread: restar al valor de la carga
 				System.out.println(MAESTRO + "Cliente " + idThread + " aceptado.");
 				D d = new D(sc,idThread);
 				idThread++;

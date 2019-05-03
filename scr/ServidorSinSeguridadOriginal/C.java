@@ -1,4 +1,4 @@
-package ServidorConOriginal;
+package ServidorSinSeguridadOriginal;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.security.cert.X509Certificate;
 
 public class C {
 	private static ServerSocket ss;	
-	private static final String MAESTRO = "MAESTRO: ";
+	private static final String MAESTRO = "MAESTRO SIN SEGURIDAD: ";
 	private static X509Certificate certSer; /* acceso default */
 	private static KeyPair keyPairServidor; /* acceso default */
 	

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -15,6 +16,13 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.xml.bind.DatatypeConverter;
 
 import org.bouncycastle.asn1.x500.X500Name;
@@ -257,6 +265,22 @@ public class Protocolo {
 			System.out.print(contenido[i] + " ");
 		}
 		System.out.println(contenido[i] + " ");
+	}
+	
+	public double getSystemCpuLoad() throws MalformedObjectNameException, NullPointerException, InstanceNotFoundException, ReflectionException
+	{
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		ObjectName name = ObjectName.getInstance("java.lang:type=OperatingSystem");
+		AttributeList list = mbs.getAttributes(name,new String[] {"SystemCpuLoad"});
+		
+		if(list.isEmpty()) return Double.NaN;
+		
+		Attribute att = (Attribute) list.get(0);
+		Double value = (Double) att.getValue();
+		
+		if(value == -1.0 ) return Double.NaN;
+		
+		return ((int) (value*1000)/10.0);
 	}
 }
 

@@ -20,9 +20,11 @@ public class Controlador {
 	{
 		//Tarea que se  a a ejecutar concurrentemente
 		Task work = createTask();
+		//TODO primera prueba: 400, 200, 80
 		int numeroDeTareas = 100;
 		//Si se quiere que todas las transacciones se ejecuten en simultaneo el siguiente valor debe ser 0
-		int tiempoEntreTareas = 1000;
+		//TODO Primera prueba: 20, 40, 100
+		int tiempoEntreTareas = 20;
 		generador = new LoadGenerator("Nombre", numeroDeTareas , work, tiempoEntreTareas);
 		//metodo que inicia la produccion de carga
 		generador.generate();	
