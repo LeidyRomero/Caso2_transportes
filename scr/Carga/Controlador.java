@@ -21,7 +21,7 @@ public class Controlador {
 		//Tarea que se  a a ejecutar concurrentemente
 		Task work = createTask();
 		//TODO primera prueba: 400, 200, 80
-		int numeroDeTareas = 100;
+		int numeroDeTareas = 400;
 		//Si se quiere que todas las transacciones se ejecuten en simultaneo el siguiente valor debe ser 0
 		//TODO Primera prueba: 20, 40, 100
 		int tiempoEntreTareas = 20;
@@ -35,7 +35,8 @@ public class Controlador {
 	 */
 	private Task createTask()
 	{
-		return new ClientServerTask();
+		//TODO rotar
+		return new TareaClienteServidorSinSeguridad();
 	}
 	public static void main(String[] args)
 	{

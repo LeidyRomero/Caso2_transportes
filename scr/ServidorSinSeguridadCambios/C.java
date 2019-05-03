@@ -50,7 +50,7 @@ public class C {
 		keyPairServidor = S.grsa();
 		certSer = S.gc(keyPairServidor);
 		D.initCertificate(certSer, keyPairServidor);
-		while (idThread<numeroThreads) {
+		while (true) {
 			try { 
 				Socket sc = ss.accept();//TODO contar transacciones aceptadas idThread: restar al valor de la carga
 				System.out.println(MAESTRO + "Cliente " + idThread + " aceptado.");

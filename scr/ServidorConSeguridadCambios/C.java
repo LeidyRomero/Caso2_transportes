@@ -35,8 +35,8 @@ public class C {
 		// Crea el socket que escucha en el puerto seleccionado.
 		ss = new ServerSocket(ip);
 		System.out.println(MAESTRO + "Socket creado.");
-		
-		
+
+
 		int idThread = 0;
 		//TODO documento
 		System.out.println(MAESTRO + "Establezca número de threads:");
@@ -46,11 +46,11 @@ public class C {
 		pool = Executors.newFixedThreadPool(numeroThreads);
 		//TODO documento
 		System.out.println(MAESTRO + "Pool creado.");
-		
+
 		keyPairServidor = S.grsa();
 		certSer = S.gc(keyPairServidor);
 		D.initCertificate(certSer, keyPairServidor);
-		while (idThread<numeroThreads) {
+		while (true) {
 			try { 
 				Socket sc = ss.accept();//TODO contar transacciones aceptadas idThread: restar al valor de la carga
 				System.out.println(MAESTRO + "Cliente " + idThread + " aceptado.");

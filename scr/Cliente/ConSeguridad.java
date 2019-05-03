@@ -19,7 +19,7 @@ public class ConSeguridad {
 	public static final String RSA = "RSA";
 	public static final String HMACSHA1 = "HMACSHA1";
 		
-	public static void main(String args[]) throws Exception
+	public void empezarComunicacion() throws Exception
 	{
 		Socket socket = null;
 		PrintWriter escritor = null;

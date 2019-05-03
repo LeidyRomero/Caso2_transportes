@@ -53,7 +53,7 @@ public class SinSeguridad {
 	public static final String RSA = "RSA";
 	public static final String HMACSHA512 = "HMACSHA512";
 
-	public static void main(String args[]) throws IOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException
+	public void empezarComunicacion() throws IOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException
 	{
 		Socket socket = null;
 		PrintWriter escritor = null;
@@ -75,9 +75,8 @@ public class SinSeguridad {
 
 		escritor.close();
 		lector.close();
-		socket.close();
+		socket.close();		
 	}
-
 	public static void procesar(BufferedReader pIn, PrintWriter pOut) throws IOException, NoSuchAlgorithmException, OperatorCreationException, CertificateException {
 
 		pOut.println(HOLA);
@@ -172,21 +171,5 @@ public class SinSeguridad {
 	    // -------------------------------------
 
 	    return new JcaX509CertificateConverter().setProvider(bcProvider).getCertificate(certBuilder.build(contentSigner));
-	}
-	
-	public double getSystemCpuLoad() throws MalformedObjectNameException, NullPointerException, InstanceNotFoundException, ReflectionException
-	{
-		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-		ObjectName name = ObjectName.getInstance("java.lang:type=OperatingSystem");
-		AttributeList list = mbs.getAttributes(name,new String[] {"SystemCpuLoad"});
-		
-		if(list.isEmpty()) return Double.NaN;
-		
-		Attribute att = (Attribute) list.get(0);
-		Double value = (Double) att.getValue();
-		
-		if(value == -1.0 ) return Double.NaN;
-		
-		return ((int) (value*1000)/10.0);
 	}
 }
