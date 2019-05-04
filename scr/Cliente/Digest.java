@@ -27,7 +27,6 @@ public class Digest {
 		try
 		{
 			digest = MessageDigest.getInstance(algoritmo);
-			//TODO
 			return null;
 		} 
 		catch (NoSuchAlgorithmException e) 

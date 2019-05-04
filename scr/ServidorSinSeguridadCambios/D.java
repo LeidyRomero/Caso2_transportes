@@ -13,8 +13,6 @@ import java.security.KeyPair;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.InstanceNotFoundException;
@@ -201,7 +199,7 @@ public class D extends Thread {
 		int i = 0;
 		double cpu = getSystemCpuLoad();
 		
-		escritor.println(dlg.substring(12, 15) + " CPU: "+ cpu);
+		escritor.println(dlg + " CPU: "+ cpu);
 
 		escritor.close();
 	}

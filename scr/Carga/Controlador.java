@@ -2,7 +2,6 @@ package Carga;
 
 import uniandes.gload.core.LoadGenerator;
 import uniandes.gload.core.Task;
-import uniandes.gload.examples.clientserver.generator.ClientServerTask;
 /**
  * 3 Monitores: tiempo parcial de transaccion, uso de CPU, numero de transacciones perdidas.
  * @author Maria Ocapo y Leidy Romero
@@ -35,7 +34,7 @@ public class Controlador {
 	 */
 	private Task createTask()
 	{
-		//TODO rotar
+		//TODO Se cambia entre las tareas del servidor con seguridad y las del servidor sin seguridad
 		return new TareaClienteServidorConSeguridad();
 	}
 	public static void main(String[] args)

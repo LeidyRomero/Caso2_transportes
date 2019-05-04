@@ -2,7 +2,6 @@ package Carga;
 
 import Cliente.SinSeguridad;
 import uniandes.gload.core.Task;
-import uniandes.gload.examples.clientserver.Client;
 /**
  * 
  * @author Maria Ocampo y Leidy Romero
@@ -27,7 +26,6 @@ public class TareaClienteServidorSinSeguridad extends Task {
 		try{
 			cliente = new SinSeguridad();
 			cliente.empezarComunicacion();
-			//TODO revisar * envios desde "Cliente"
 		}
 		catch(Exception e)
 		{

@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.channels.ShutdownChannelGroupException;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
@@ -21,7 +20,7 @@ public class C {
 	private static final String MAESTRO = "MAESTRO: ";
 	private static X509Certificate certSer; /* acceso default */
 	private static KeyPair keyPairServidor; /* acceso default */
-	//TODO documento: en el contrato esta final
+	//TODO Pool de threads
 	private static ExecutorService pool;
 	/**
 	 * @param args
@@ -41,16 +40,14 @@ public class C {
 
 
 		int idThread = 0;
-		//TODO documento
+		//TODO Se pide el número de threads por consola
 		System.out.println(MAESTRO + "Establezca número de threads:");
-		//TODO documento
 		int numeroThreads = Integer.parseInt(br.readLine());
-		//TODO documento
+		//TODO Se inicializa el pool con el número de threads dados
 		pool = Executors.newFixedThreadPool(numeroThreads);
-		//TODO documento
 		System.out.println(MAESTRO + "Pool creado.");
 		
-		//TODO documento
+		//TODO Se pide el número de clientes esperado por consola
 		System.out.println(MAESTRO + "Establezca número de clientes:");
 		int numeroClientes = Integer.parseInt(br.readLine());
 		System.out.println(MAESTRO + "Número de clientes creado.");
@@ -59,9 +56,10 @@ public class C {
 		certSer = S.gc(keyPairServidor);
 		D.initCertificate(certSer, keyPairServidor);
 		
-		PrintWriter escritorTiempo = new PrintWriter(new FileWriter("./data/tiemposConSeguridad.txt", true));
-		PrintWriter escritorCPU = new PrintWriter(new FileWriter("./data/cpuConSeguridad.txt", true));
-		PrintWriter escritorTransacciones = new PrintWriter(new FileWriter("./data/transaccionesExitosas.txt", true));
+		//TODO se crean los archivos donde se van a escribir los datos de los monitores
+		PrintWriter escritorTiempo = new PrintWriter(new FileWriter("./data/tiemposConSeguridad.csv", true));
+		PrintWriter escritorCPU = new PrintWriter(new FileWriter("./data/cpuConSeguridad.csv", true));
+		PrintWriter escritorTransacciones = new PrintWriter(new FileWriter("./data/transaccionesExitosas.csv", true));
 		
 		escritorTiempo.println("--------------------------");
 		escritorTiempo.println("Threads: " + numeroThreads + " - Clientes: " + numeroClientes);
@@ -78,20 +76,19 @@ public class C {
 		
 		while (true) {
 			try { 
-				Socket sc = ss.accept();//TODO contar transacciones aceptadas idThread: restar al valor de la carga
+				Socket sc = ss.accept();
 				System.out.println(MAESTRO + "Cliente " + idThread + " aceptado.");
 				D d = new D(sc,idThread, numeroClientes);
 				idThread++;
-				//TODO documento
+				//TODO Asigna un thread del pool por conexión
 				pool.execute(d);
 			} catch (IOException e) {
 				System.out.println(MAESTRO + "Error creando el socket cliente.");
-				//TODO documento revisar
-				//pool.shutdown();
+				//TODO Detiene la ejecución del thread
 				shutdownAndAwaitTermination(pool);
 				e.printStackTrace();
 				
-				//TODO documento
+				//TODO Cierra los escritores de los archivos de los monitores
 				escritorTiempo.close();
 				escritorCPU.close();
 				escritorTransacciones.close();

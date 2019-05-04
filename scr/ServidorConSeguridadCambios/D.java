@@ -3,8 +3,6 @@ package ServidorConSeguridadCambios;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,7 +13,6 @@ import java.net.Socket;
 import java.security.KeyPair;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.sql.Date;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -214,15 +211,15 @@ public class D implements Runnable
 	//------------------------------- MONITORES ------------------------------------------
 	
 	public void escribirTiempo(long tiempo) throws IOException, MalformedObjectNameException, InstanceNotFoundException, NullPointerException, ReflectionException {
-		PrintWriter escritorTiempo = new PrintWriter(new FileWriter("./data/tiemposConSeguridad.txt", true));
-		escritorTiempo.println(dlg + tiempo + " ms");
+		PrintWriter escritorTiempo = new PrintWriter(new FileWriter("./data/tiemposConSeguridad50.csv", true));
+		escritorTiempo.println(tiempo);
 		escritorTiempo.close();
 	}
 	
 	public void escribirCPU() throws MalformedObjectNameException, InstanceNotFoundException, NullPointerException, ReflectionException, IOException {
-		PrintWriter escritorCPU = new PrintWriter(new FileWriter("./data/cpuConSeguridad.txt", true));
+		PrintWriter escritorCPU = new PrintWriter(new FileWriter("./data/cpuConSeguridad50.csv", true));
 		double cpu = getSystemCpuLoad();
-		escritorCPU.println(dlg + " CPU: "+ cpu);	
+		escritorCPU.println(cpu);	
 		escritorCPU.close();
 	}
 	
@@ -247,7 +244,7 @@ public class D implements Runnable
 		
 		if(id == (numeroClientes-1))
 		{
-			PrintWriter escritorTransacciones = new PrintWriter(new FileWriter("./data/transaccionesExitosas.txt", true));
+			PrintWriter escritorTransacciones = new PrintWriter(new FileWriter("./data/transaccionesExitosas50.csv", true));
 			escritorTransacciones.println("Transacciones exitosas: " + exitosa);
 			escritorTransacciones.close();
 		}
