@@ -54,12 +54,13 @@ public class C {
 			try { 
 				Socket sc = ss.accept();//TODO contar transacciones aceptadas idThread: restar al valor de la carga
 				System.out.println(MAESTRO + "Cliente " + idThread + " aceptado.");
-				D d = new D(sc,idThread);
+				D d = new D(sc,idThread, numeroThreads);
 				idThread++;
 				//TODO documento
 				pool.execute(d);
 			} catch (IOException e) {
 				System.out.println(MAESTRO + "Error creando el socket cliente.");
+				//TODO documento
 				shutdownAndAwaitTermination(pool);
 				e.printStackTrace();
 			}
