@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+
 public class C {
 	private static ServerSocket ss;	
 	private static final String MAESTRO = "MAESTRO: ";
@@ -20,6 +21,7 @@ public class C {
 	private static KeyPair keyPairServidor; /* acceso default */
 	//TODO documento: en el contrato esta final
 	private static ExecutorService pool;
+	private static int exito;
 	/**
 	 * @param args
 	 */
@@ -58,6 +60,9 @@ public class C {
 				idThread++;
 				//TODO documento
 				pool.execute(d);
+				//TODO ROTAR
+				if(idThread == 399)
+					System.out.println(exito);
 			} catch (IOException e) {
 				System.out.println(MAESTRO + "Error creando el socket cliente.");
 				//TODO documento revisar
@@ -83,5 +88,10 @@ public class C {
 			// Preserve interrupt status
 			Thread.currentThread().interrupt();
 		}
+	}
+	
+	public synchronized void termino() 
+	{
+		exito++;
 	}
 }

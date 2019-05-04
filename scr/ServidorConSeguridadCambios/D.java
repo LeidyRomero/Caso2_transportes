@@ -3,16 +3,29 @@ package ServidorConSeguridadCambios;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
 import java.net.Socket;
 import java.security.KeyPair;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.sql.Date;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.xml.bind.DatatypeConverter;
 
 //TODO documento
@@ -28,7 +41,7 @@ public class D implements Runnable
 	public static final String INICIO = "INICIO";
 	public static final String ERROR = "ERROR";
 	public static final String REC = "recibio-";
-
+	
 	// Atributos
 	private Socket sc = null;
 	private String dlg;
@@ -125,7 +138,7 @@ public class D implements Runnable
 
 				/***** Fase 5: *****/
 				linea = dc.readLine();
-				//TODO MONITOR DE TIEMPOS
+				long inicia = System.currentTimeMillis();
 				byte[] llaveSimetrica = S.ad(
 						toByteArray(linea), 
 						keyPairServidor.getPrivate(), algoritmos[2] );
@@ -162,6 +175,8 @@ public class D implements Runnable
 					System.out.println(dlg + "verificacion de integridad:OK. -continuado.");
 					byte[] recibo = S.ae(hmac, keyPairServidor.getPrivate(), algoritmos[2]);
 					ac.println(toHexString(recibo));
+					long termina = System.currentTimeMillis();
+					escribirTiempo(termina-inicia);
 				} else {
 					ac.println(ERROR);
 					throw new Exception(dlg + "Error en verificacion de integridad. -terminando.");
@@ -181,6 +196,33 @@ public class D implements Runnable
 
 	public static byte[] toByteArray(String s) {
 	    return DatatypeConverter.parseHexBinary(s);
+	}
+	
+	public void escribirTiempo(long tiempo) throws IOException, MalformedObjectNameException, InstanceNotFoundException, NullPointerException, ReflectionException {
+		PrintWriter escritor2 = new PrintWriter(new FileWriter("./data/cpuConSeguridad.txt", true));
+		PrintWriter escritor = new PrintWriter(new FileWriter("./data/tiemposConSeguridad.txt", true));
+		escritor.println(dlg + tiempo + " ms");
+
+		double cpu = getSystemCpuLoad();
+		escritor2.println(dlg + " CPU: "+ cpu);
+		escritor.close();
+		escritor2.close();
+	}
+	
+	public static double getSystemCpuLoad() throws MalformedObjectNameException, NullPointerException, InstanceNotFoundException, ReflectionException
+	{
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		ObjectName name = ObjectName.getInstance("java.lang:type=OperatingSystem");
+		AttributeList list = mbs.getAttributes(name,new String[] {"SystemCpuLoad"});
+
+		if(list.isEmpty()) return Double.NaN;
+
+		Attribute att = (Attribute) list.get(0);
+		Double value = (Double) att.getValue();
+
+		if(value == -1.0 ) return Double.NaN;
+
+		return ((int) (value*1000)/10.0);
 	}
 	
 }

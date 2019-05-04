@@ -27,7 +27,7 @@ public class Controlador {
 		int tiempoEntreTareas = 20;
 		generador = new LoadGenerator("Nombre", numeroDeTareas , work, tiempoEntreTareas);
 		//metodo que inicia la produccion de carga
-		generador.generate();	
+		generador.generate();
 	}
 	/**
 	 * Metodo que se encarga de instanciar la tarea a ejecutar concurrentemente
@@ -36,7 +36,7 @@ public class Controlador {
 	private Task createTask()
 	{
 		//TODO rotar
-		return new TareaClienteServidorSinSeguridad();
+		return new TareaClienteServidorConSeguridad();
 	}
 	public static void main(String[] args)
 	{

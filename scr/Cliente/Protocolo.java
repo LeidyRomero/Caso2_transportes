@@ -40,7 +40,7 @@ public class Protocolo {
 	public static final String ERROR = "ERROR";
 	public static final String OK = "OK";
 	public static final String SEPARADOR = ":";
-
+	
 	private static final String PADDING = "AES/ECB/PKCS5Padding";
 
 	public static void procesar (String algoritmos,BufferedReader stdIn, BufferedReader pIn, PrintWriter pOut) throws Exception
