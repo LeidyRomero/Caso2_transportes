@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 
 public class ConSeguridad {
 	private static int PUERTO = 8000;
-	public static final String SERVIDOR = "localhost";
+	public static final String SERVIDOR = "157.253.239.21";
 	public static final String HOLA = "HOLA";
 	public static final String ALGORITMOS = "ALGORITMOS";
 	public static final String OK = "OK";
