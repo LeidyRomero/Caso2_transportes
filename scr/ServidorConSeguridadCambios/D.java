@@ -49,8 +49,17 @@ public class D implements Runnable
 	private static X509Certificate certSer;
 	private static KeyPair keyPairServidor;
 	
-	public D (Socket csP, int idP) {
+	//TODO documento
+	private static int exitosa;
+	private int id;
+	private int numeroClientes;
+	
+	public D (Socket csP, int idP, int numClientes) {
 		sc = csP;
+		//TODO documento
+		id = idP;
+		numeroClientes = numClientes;
+		
 		dlg = new String("delegado " + idP + ": ");
 		try {
 		mybyte = new byte[520]; 
@@ -138,6 +147,7 @@ public class D implements Runnable
 
 				/***** Fase 5: *****/
 				linea = dc.readLine();
+				//TODO MONITOR TIEMPO
 				long inicia = System.currentTimeMillis();
 				byte[] llaveSimetrica = S.ad(
 						toByteArray(linea), 
@@ -175,8 +185,11 @@ public class D implements Runnable
 					System.out.println(dlg + "verificacion de integridad:OK. -continuado.");
 					byte[] recibo = S.ae(hmac, keyPairServidor.getPrivate(), algoritmos[2]);
 					ac.println(toHexString(recibo));
+					//TODO MONITORES
 					long termina = System.currentTimeMillis();
 					escribirTiempo(termina-inicia);
+					escribirCPU();
+					termino(id);
 				} else {
 					ac.println(ERROR);
 					throw new Exception(dlg + "Error en verificacion de integridad. -terminando.");
@@ -198,15 +211,19 @@ public class D implements Runnable
 	    return DatatypeConverter.parseHexBinary(s);
 	}
 	
+	//------------------------------- MONITORES ------------------------------------------
+	
 	public void escribirTiempo(long tiempo) throws IOException, MalformedObjectNameException, InstanceNotFoundException, NullPointerException, ReflectionException {
-		PrintWriter escritor2 = new PrintWriter(new FileWriter("./data/cpuConSeguridad.txt", true));
-		PrintWriter escritor = new PrintWriter(new FileWriter("./data/tiemposConSeguridad.txt", true));
-		escritor.println(dlg + tiempo + " ms");
-
+		PrintWriter escritorTiempo = new PrintWriter(new FileWriter("./data/tiemposConSeguridad.txt", true));
+		escritorTiempo.println(dlg + tiempo + " ms");
+		escritorTiempo.close();
+	}
+	
+	public void escribirCPU() throws MalformedObjectNameException, InstanceNotFoundException, NullPointerException, ReflectionException, IOException {
+		PrintWriter escritorCPU = new PrintWriter(new FileWriter("./data/cpuConSeguridad.txt", true));
 		double cpu = getSystemCpuLoad();
-		escritor2.println(dlg + " CPU: "+ cpu);
-		escritor.close();
-		escritor2.close();
+		escritorCPU.println(dlg + " CPU: "+ cpu);	
+		escritorCPU.close();
 	}
 	
 	public static double getSystemCpuLoad() throws MalformedObjectNameException, NullPointerException, InstanceNotFoundException, ReflectionException
@@ -223,6 +240,17 @@ public class D implements Runnable
 		if(value == -1.0 ) return Double.NaN;
 
 		return ((int) (value*1000)/10.0);
+	}
+	
+	public synchronized void termino(int id) throws IOException {
+		exitosa++;
+		
+		if(id == (numeroClientes-1))
+		{
+			PrintWriter escritorTransacciones = new PrintWriter(new FileWriter("./data/transaccionesExitosas.txt", true));
+			escritorTransacciones.println("Transacciones exitosas: " + exitosa);
+			escritorTransacciones.close();
+		}
 	}
 	
 }

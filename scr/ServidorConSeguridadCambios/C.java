@@ -1,8 +1,10 @@
 package ServidorConSeguridadCambios;
 
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.channels.ShutdownChannelGroupException;
@@ -21,7 +23,6 @@ public class C {
 	private static KeyPair keyPairServidor; /* acceso default */
 	//TODO documento: en el contrato esta final
 	private static ExecutorService pool;
-	private static int exito;
 	/**
 	 * @param args
 	 */
@@ -48,27 +49,52 @@ public class C {
 		pool = Executors.newFixedThreadPool(numeroThreads);
 		//TODO documento
 		System.out.println(MAESTRO + "Pool creado.");
+		
+		//TODO documento
+		System.out.println(MAESTRO + "Establezca número de clientes:");
+		int numeroClientes = Integer.parseInt(br.readLine());
+		System.out.println(MAESTRO + "Número de clientes creado.");
 
 		keyPairServidor = S.grsa();
 		certSer = S.gc(keyPairServidor);
 		D.initCertificate(certSer, keyPairServidor);
+		
+		PrintWriter escritorTiempo = new PrintWriter(new FileWriter("./data/tiemposConSeguridad.txt", true));
+		PrintWriter escritorCPU = new PrintWriter(new FileWriter("./data/cpuConSeguridad.txt", true));
+		PrintWriter escritorTransacciones = new PrintWriter(new FileWriter("./data/transaccionesExitosas.txt", true));
+		
+		escritorTiempo.println("--------------------------");
+		escritorTiempo.println("Threads: " + numeroThreads + " - Clientes: " + numeroClientes);
+		
+		escritorCPU.println("--------------------------");
+		escritorCPU.println("Threads: " + numeroThreads + " - Clientes: " + numeroClientes);
+		
+		escritorTransacciones.println("--------------------------");
+		escritorTransacciones.println("Threads: " + numeroThreads + " - Clientes: " + numeroClientes);
+		
+		escritorTiempo.close();
+		escritorTransacciones.close();
+		escritorCPU.close();
+		
 		while (true) {
 			try { 
 				Socket sc = ss.accept();//TODO contar transacciones aceptadas idThread: restar al valor de la carga
 				System.out.println(MAESTRO + "Cliente " + idThread + " aceptado.");
-				D d = new D(sc,idThread);
+				D d = new D(sc,idThread, numeroClientes);
 				idThread++;
 				//TODO documento
 				pool.execute(d);
-				//TODO ROTAR
-				if(idThread == 399)
-					System.out.println(exito);
 			} catch (IOException e) {
 				System.out.println(MAESTRO + "Error creando el socket cliente.");
 				//TODO documento revisar
 				//pool.shutdown();
 				shutdownAndAwaitTermination(pool);
 				e.printStackTrace();
+				
+				//TODO documento
+				escritorTiempo.close();
+				escritorCPU.close();
+				escritorTransacciones.close();
 			}
 		}
 	}
@@ -88,10 +114,5 @@ public class C {
 			// Preserve interrupt status
 			Thread.currentThread().interrupt();
 		}
-	}
-	
-	public synchronized void termino() 
-	{
-		exito++;
 	}
 }
