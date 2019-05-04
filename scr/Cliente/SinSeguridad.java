@@ -42,8 +42,8 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 public class SinSeguridad {
 
-	public static final int PUERTO = 3400;
-	public static final String SERVIDOR = "localhost";
+	public static final int PUERTO = 8000;
+	public static final String SERVIDOR = "157.253.239.21";
 
 	public static final String HOLA = "HOLA";
 	public static final String ALGORITMOS = "ALGORITMOS";
